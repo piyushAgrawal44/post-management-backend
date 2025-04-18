@@ -11,6 +11,7 @@ export const errorMiddleware = (err, req, res, next) => {
 
   const response = {
     success: false,
+    statusCode:err.statusCode,
     message: err.message,
   };
 

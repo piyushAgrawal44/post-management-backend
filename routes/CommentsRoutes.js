@@ -8,16 +8,16 @@ import { isAdmin, isAuthenticated } from "../middleware/authMiddleware.js";
 
 const router = express.Router();
 
-router.post("posts/:postId/add-comment", isAuthenticated, addComment);
+router.post("/posts/:postId/add-comment", isAuthenticated, addComment);
 
 router.get(
-  "posts/:postId/all-comments",
+  "/posts/:postId/all-comments",
   isAuthenticated,
   getAllCommentsOfPosts
 );
 
-router.post(
-  "posts/:postId/approve-comment",
+router.put(
+  "/posts/:postId/approve-comment",
   isAuthenticated,
   isAdmin,
   approveComment

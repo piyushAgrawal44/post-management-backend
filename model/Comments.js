@@ -20,6 +20,6 @@ export const CommentSchema = new mongoose.Schema({
     enum: ["Pending", "Approved"],
     default: "Pending",
   },
-});
+},{timestamps:true});
 
 export const Comments = new mongoose.model("Comments", CommentSchema);
