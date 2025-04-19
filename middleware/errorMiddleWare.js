@@ -1,5 +1,3 @@
-
-import { logger } from "../winston/logger.js";
 export const errorMiddleware = (err, req, res, next) => {
   err.message = err.message || "Internal server error";
   err.statusCode = err.statusCode || 500;
@@ -24,7 +22,7 @@ export const TryCatchHandler = (passedFunc) => async (req, res, next) => {
   try {
     await passedFunc(req, res, next);
   } catch (error) {
-    logger.error(error.message);
+    console.log(error)
     next(error);
   }
 };
