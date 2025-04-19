@@ -1,6 +1,5 @@
 import { TryCatchHandler } from "../middleware/errorMiddleWare.js";
 import { Comments } from "../model/Comments.js";
-import { Posts } from "../model/Posts.js";
 
 import { ErrorHandler } from "../utils/errorHandler.js";
 import { sendResponse } from "../utils/utils.js";
@@ -12,10 +11,7 @@ export const addComment = TryCatchHandler(async (req, res, next) => {
 
   if (!comment) return next(new ErrorHandler("Comment is required", 400));
 
-  const newComment = await Comments.create({ userId, postId, comment });
-  let post = await Posts.findById(postId);
-  post.comments = [...post.comments, newComment?._id];
-  await post.save();
+  await Comments.create({ userId, postId, comment });
 
   return sendResponse(res, 201, "Comment Added ");
 });
@@ -50,5 +46,7 @@ export const getAllCommentsOfPosts = TryCatchHandler(async (req, res, next) => {
     .skip(skip)
     .limit(limit);
 
-  return sendResponse(res, 200, "", allComments);
+  const commentCount = await Comments.countDocuments(filterOpt);
+
+  return sendResponse(res, 200, "", { allComments, commentCount });
 });

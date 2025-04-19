@@ -1,4 +1,5 @@
 import { TryCatchHandler } from "../middleware/errorMiddleWare.js";
+import { Comments } from "../model/Comments.js";
 import { Posts } from "../model/Posts.js";
 import { ErrorHandler } from "../utils/errorHandler.js";
 import { sendResponse } from "../utils/utils.js";
@@ -22,22 +23,22 @@ export const getAllPosts = TryCatchHandler(async (req, res, next) => {
 
   const allPosts = await Posts.find({})
     .populate("userId", "emailOrUserName")
-    .populate("comments", "status")
     .sort({ createdAt: -1 })
     .skip(skip)
     .limit(limit)
     .lean();
 
-  const roleToFilter = (comments) => {
-    return req?.user?.role === "user"
-      ? comments?.filter((c) => c?.status === "Approved")?.length
-      : comments?.length;
-  };
+  const filterOpt = (post) =>
+    req?.user?.role === "admin"
+      ? { postId: post?._id?.toString() }
+      : { postId: post?._id?.toString(), status: "Approved" };
 
-  const transformedPosts = allPosts.map((post) => ({
-    ...post,
-    comments: roleToFilter(post?.comments) || 0,
-  }));
+  const transformedPosts = await Promise.all(
+    allPosts.map(async (post) => ({
+      ...post,
+      comments: await Comments.countDocuments(filterOpt(post)),
+    }))
+  );
 
   return sendResponse(res, 200, "", transformedPosts);
 });
