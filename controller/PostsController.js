@@ -1,24 +1,38 @@
+// controllers/post.controller.js
 import { TryCatchHandler } from "../middleware/errorMiddleWare.js";
 import { Comments } from "../model/Comments.js";
 import { Posts } from "../model/Posts.js";
 import { ErrorHandler } from "../utils/errorHandler.js";
 import { sendResponse } from "../utils/utils.js";
+import { getAllPostsSchema, createPostSchema } from "../validators/post.validator.js";
 
+// CREATE POST
 export const createPost = TryCatchHandler(async (req, res, next) => {
-  const { title, content } = req.body;
+  const { error, value } = createPostSchema.validate(req.body);
+
+  if (error) {
+    return next(new ErrorHandler(error.details[0].message, 400));
+  }
+
   const userId = req?.user?._id;
+  if (!userId) {
+    return next(new ErrorHandler("Unauthorized: User not found", 401));
+  }
 
-  if (!title || !content)
-    return next(new ErrorHandler("Title and Content is required", 400));
-
-  await Posts.create({ userId, title, content });
+  await Posts.create({ userId, ...value });
 
   return sendResponse(res, 201, "Post Submitted Successfully");
 });
 
+// GET ALL POSTS
 export const getAllPosts = TryCatchHandler(async (req, res, next) => {
-  const page = Number(req.query.page) || 1;
-  const limit = Number(req.query.limit) || 10;
+  const { error, value } = getAllPostsSchema.validate(req.query);
+
+  if (error) {
+    return next(new ErrorHandler(error.details[0].message, 400));
+  }
+
+  const { page, limit } = value;
   const skip = (page - 1) * limit;
 
   const allPosts = await Posts.find({})
