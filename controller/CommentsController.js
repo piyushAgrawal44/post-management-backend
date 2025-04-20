@@ -46,7 +46,7 @@ export const getAllCommentsOfPosts = TryCatchHandler(async (req, res, next) => {
     .skip(skip)
     .limit(limit);
 
-  const commentCount = await Comments.countDocuments(filterOpt);
+  const commentCount = await Comments.countDocuments({ ...filterOpt });
 
   return sendResponse(res, 200, "", { allComments, commentCount });
 });
